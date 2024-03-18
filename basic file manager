@@ -1,0 +1,92 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <windows.h>
+
+using namespace std;
+
+void listFiles(const string& directory) {
+    WIN32_FIND_DATAA findFileData;
+    HANDLE hFind;
+
+    string searchPath = directory + "\\*";
+    hFind = FindFirstFileA(searchPath.c_str(), &findFileData);
+
+    if (hFind != INVALID_HANDLE_VALUE) {
+        do {
+            cout << findFileData.cFileName << endl;
+        } while (FindNextFileA(hFind, &findFileData) != 0);
+        FindClose(hFind);
+    } else {
+        cerr << "Error: Unable to open directory." << endl;
+    }
+}
+
+void createDirectory(const string& directory) {
+    if (CreateDirectoryA(directory.c_str(), NULL) != 0) {
+        cout << "Directory created successfully." << endl;
+    } else {
+        cerr << "Error: Unable to create directory." << endl;
+    }
+}
+
+void copyFile(const string& source, const string& destination) {
+    ifstream src(source.c_str(), ios::binary);
+    ofstream dst(destination.c_str(), ios::binary);
+
+    dst << src.rdbuf();
+
+    src.close();
+    dst.close();
+
+    cout << "File copied successfully." << endl;
+}
+
+void moveFile(const string& source, const string& destination) {
+    if (MoveFileA(source.c_str(), destination.c_str()) != 0) {
+        cout << "File moved successfully." << endl;
+    } else {
+        cerr << "Error: Unable to move file." << endl;
+    }
+}
+
+int main() {
+    string command, source, destination;
+
+    cout << "Welcome to Basic File Manager" << endl;
+
+    while (true) {
+        cout << "\nOptions:\n1. List files in a directory\n2. Create a directory\n3. Copy a file\n4. Move a file\n5. Exit\n";
+        cout << "Enter your choice: ";
+        getline(cin, command);
+
+        if (command == "1") {
+            cout << "Enter directory path: ";
+            getline(cin, source);
+            listFiles(source);
+        } else if (command == "2") {
+            cout << "Enter directory path to create: ";
+            getline(cin, source);
+            createDirectory(source);
+        } else if (command == "3") {
+            cout << "Enter source file path: ";
+            getline(cin, source);
+            cout << "Enter destination file path: ";
+            getline(cin, destination);
+            copyFile(source, destination);
+        } else if (command == "4") {
+            cout << "Enter source file path: ";
+            getline(cin, source);
+            cout << "Enter destination file path: ";
+            getline(cin, destination);
+            moveFile(source, destination);
+        } else if (command == "5") {
+            cout << "Exiting..." << endl;
+            break;
+        } else {
+            cout << "Invalid command. Please try again." << endl;
+        }
+    }
+
+    return 0;
+}
